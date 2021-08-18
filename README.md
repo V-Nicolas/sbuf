@@ -30,10 +30,10 @@ pthread if you compil with SBUF_THREAD_SAFE.
 
 ## Compil test / example:
 ```
-gcc -o test1 test2.c src/sbuf.c -I src/ -O2 -W -Wall
-gcc -o test2 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_THREAD_SAFE
-gcc -o test4 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_ALLOC_SIZE=1024
-gcc -o test4 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_ALLOC_SIZE=1 -DSBUF_THREAD_SAFE
+gcc -o test1 test2.c src/sbuf.c -I src/ -O2 -W -Wall -Wextra -pedantic -Wpedantic -std=c99 -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wdate-time -Wfloat-equal -Wformat=2 -Winit-self -Wnested-externs -Wnull-dereference -Wold-style-definition -Wpointer-arith -Wshadow -Wstack-protector -Wstrict-prototypes -Wswitch-default -Wwrite-strings -Wmissing-prototypes -Wformat-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=2 -D_XOPEN_SOURCE=700 -DNDEBUG -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnormalized -Wsuggest-attribute=format -Wtrampolines -pie
+gcc -o test2 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_THREAD_SAFE -Wextra -pedantic -Wpedantic -std=c99 -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wdate-time -Wfloat-equal -Wformat=2 -Winit-self -Wnested-externs -Wnull-dereference -Wold-style-definition -Wpointer-arith -Wshadow -Wstack-protector -Wstrict-prototypes -Wswitch-default -Wwrite-strings -Wmissing-prototypes -Wformat-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=2 -D_XOPEN_SOURCE=700 -DNDEBUG -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnormalized -Wsuggest-attribute=format -Wtrampolines -pie
+gcc -o test4 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_ALLOC_SIZE=1024 -Wextra -pedantic -Wpedantic -std=c99 -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wdate-time -Wfloat-equal -Wformat=2 -Winit-self -Wnested-externs -Wnull-dereference -Wold-style-definition -Wpointer-arith -Wshadow -Wstack-protector -Wstrict-prototypes -Wswitch-default -Wwrite-strings -Wmissing-prototypes -Wformat-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=2 -D_XOPEN_SOURCE=700 -DNDEBUG -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnormalized -Wsuggest-attribute=format -Wtrampolines -pie
+gcc -o test4 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_ALLOC_SIZE=1 -DSBUF_THREAD_SAFE  -Wextra -pedantic -Wpedantic -std=c99 -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wdate-time -Wfloat-equal -Wformat=2 -Winit-self -Wnested-externs -Wnull-dereference -Wold-style-definition -Wpointer-arith -Wshadow -Wstack-protector -Wstrict-prototypes -Wswitch-default -Wwrite-strings -Wmissing-prototypes -Wformat-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=2 -D_XOPEN_SOURCE=700 -DNDEBUG -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnormalized -Wsuggest-attribute=format -Wtrampolines -pie
 ```
 <br/>
 
