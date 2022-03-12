@@ -7,7 +7,7 @@ Library for string operations.
 <br/>
 
 #### Why ?
-For fun, sure, and my utility.
+For fun, sure.
 <br/>
 <br/>
 
@@ -30,10 +30,7 @@ pthread if you compil with SBUF_THREAD_SAFE.
 
 ## Compil test / example:
 ```
-gcc -o test1 test2.c src/sbuf.c -I src/ -O2 -W -Wall -Wextra -pedantic -Wpedantic -std=c99 -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wdate-time -Wfloat-equal -Wformat=2 -Winit-self -Wnested-externs -Wnull-dereference -Wold-style-definition -Wpointer-arith -Wshadow -Wstack-protector -Wstrict-prototypes -Wswitch-default -Wwrite-strings -Wmissing-prototypes -Wformat-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=2 -D_XOPEN_SOURCE=700 -DNDEBUG -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnormalized -Wsuggest-attribute=format -Wtrampolines -pie
-gcc -o test2 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_THREAD_SAFE -Wextra -pedantic -Wpedantic -std=c99 -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wdate-time -Wfloat-equal -Wformat=2 -Winit-self -Wnested-externs -Wnull-dereference -Wold-style-definition -Wpointer-arith -Wshadow -Wstack-protector -Wstrict-prototypes -Wswitch-default -Wwrite-strings -Wmissing-prototypes -Wformat-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=2 -D_XOPEN_SOURCE=700 -DNDEBUG -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnormalized -Wsuggest-attribute=format -Wtrampolines -pie
-gcc -o test4 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_ALLOC_SIZE=1024 -Wextra -pedantic -Wpedantic -std=c99 -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wdate-time -Wfloat-equal -Wformat=2 -Winit-self -Wnested-externs -Wnull-dereference -Wold-style-definition -Wpointer-arith -Wshadow -Wstack-protector -Wstrict-prototypes -Wswitch-default -Wwrite-strings -Wmissing-prototypes -Wformat-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=2 -D_XOPEN_SOURCE=700 -DNDEBUG -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnormalized -Wsuggest-attribute=format -Wtrampolines -pie
-gcc -o test4 test2.c src/sbuf.c -I src/ -O2 -W -Wall -DSBUF_ALLOC_SIZE=1 -DSBUF_THREAD_SAFE  -Wextra -pedantic -Wpedantic -std=c99 -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wdate-time -Wfloat-equal -Wformat=2 -Winit-self -Wnested-externs -Wnull-dereference -Wold-style-definition -Wpointer-arith -Wshadow -Wstack-protector -Wstrict-prototypes -Wswitch-default -Wwrite-strings -Wmissing-prototypes -Wformat-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=2 -D_XOPEN_SOURCE=700 -DNDEBUG -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnormalized -Wsuggest-attribute=format -Wtrampolines -pie
+./tests.sh
 ```
 <br/>
 
@@ -113,7 +110,7 @@ Description: Return buffer length.
 
 
 ```
-long sbuf_search_str_offset(struct sbuf *str, const char *substr);
+long sbuf_search(struct sbuf *str, const char *substr);
 ```
 Description: Return offset to find string or -1 if not found.
 <br/>
@@ -133,6 +130,15 @@ Need free the duplicat.
 void sbuf_trim_blank(struct sbuf *str);
 ```
 Description: Delete blanks char at end buffer. (\t, ' ', \n)
+<br/>
+<br/>
+
+
+```
+int sbuf_trim_char(struct sbuf *str, char c);
+```
+Description: Delete all last char in string if equal to <c> param<br/>
+Return: -1 not delete, else <c> is delete
 <br/>
 <br/>
 

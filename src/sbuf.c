@@ -97,14 +97,16 @@ sbuf_add_unsafe(struct sbuf *str, const char *addstr)
 {
     size_t addlen;
 
-    if (!addstr || !addstr[0])
+    if (!addstr || !addstr[0]) {
         return 0;
+    }
 
     addlen = strlen(addstr);
     if ((str->offset + addlen) >= str->size) {
         str->size += SBUF_ALLOC_SIZE;
-        if (addlen >= SBUF_ALLOC_SIZE)
+        if (addlen >= SBUF_ALLOC_SIZE) {
             str->size += addlen;
+	}
         SBUF_RESIZE(str->buf, str->size);
     }
 
@@ -125,11 +127,14 @@ sbuf_vadd(struct sbuf *str, const char *fmt, ...)
     nwrite = vasprintf(&buf, fmt, va);
     va_end(va);
 
-    if (nwrite > 0)
+    if (nwrite > 0) {
         sbuf_add(str, buf);
+    }
 
-    if (buf)
+    if (buf) {
         free(buf);
+    }
+    
     return nwrite;
 }
 
@@ -147,6 +152,10 @@ sbuf_add_to_offset_unsafe(struct sbuf *str, size_t offset, const char *addstr)
 {
     size_t addlen;
 
+    if (offset > str->offset) {
+	offset = str->offset;
+    }
+    
     addlen = strlen(addstr);
     if (str->size <= (str->offset + addlen)) {
         str->size += (addlen + SBUF_ALLOC_SIZE);
@@ -169,15 +178,20 @@ sbuf_add_to_offset_unsafe(struct sbuf *str, size_t offset, const char *addstr)
 int
 sbuf_set_size(struct sbuf *str, size_t newsize)
 {
+    if ((ssize_t) newsize < 1) {
+	return -1;
+    }
+    
     sbuf_lock(str);
-    if (newsize < str->offset) {
+    if (newsize <= str->offset) {
         sbuf_unlock(str);
         return -1;
     }
-
+    
     SBUF_RESIZE(str->buf, newsize);
     str->size = newsize;
     sbuf_unlock(str);
+
     return 0;
 }
 
@@ -189,11 +203,12 @@ sbuf_len(struct sbuf *str)
     sbuf_lock(str);
     len = str->offset;
     sbuf_unlock(str);
+
     return len;
 }
 
 long
-sbuf_search_str_offset(struct sbuf *str, const char *substr)
+sbuf_search(struct sbuf *str, const char *substr)
 {
     long ret;
 
@@ -206,8 +221,10 @@ sbuf_search_str_offset_unsafe(struct sbuf *str, const char *substr)
 {
     const char *ret;
 
-    if (!(ret = strstr(str->buf, substr)))
+    if (!(ret = strstr(str->buf, substr))) {
         return -1;
+    }
+    
     return ret - str->buf;
 }
 
@@ -233,7 +250,7 @@ sbuf_to_upper(struct sbuf *str)
 void
 sbuf_trim_blank(struct sbuf *str)
 {
-    size_t i;
+    ssize_t i;
 
     sbuf_lock(str);
     if (!str->offset) {
@@ -241,12 +258,49 @@ sbuf_trim_blank(struct sbuf *str)
         return;
     }
 
+    i = (ssize_t) str->offset - 1;
+
 #define sbuf_isblank(c) (isblank(c) || c == '\n')
-    i = str->offset - 1;
-    while (i && sbuf_isblank(str->buf[i]))
-        str->buf[i--] = 0;
-    str->offset = i;
+    if (sbuf_isblank(str->buf[i])) {
+	do {
+	    str->buf[i] = 0;
+	    i--;
+	} while (i > -1 && sbuf_isblank(str->buf[i]));
+
+	str->offset = (size_t) i + 1;
+    }
+
     sbuf_unlock(str);
+}
+
+int
+sbuf_trim_char(struct sbuf *str, char c)
+{
+    int ret;
+    ssize_t i;
+    
+    sbuf_lock(str);
+    if (c == 0 || str->offset == 0) {
+        sbuf_unlock(str);
+	return -1;
+    }
+
+    ret = -1;
+    i = (ssize_t) str->offset - 1;
+
+    if (str->buf[i] == c) {
+	ret = 0;
+	    
+	do {
+	    str->buf[i] = 0;
+	    i--;
+	} while (i > -1 && str->buf[i] == c);
+	
+	str->offset = (size_t) i + 1;
+    }
+    
+    sbuf_unlock(str);
+    return ret;
 }
 
 void
@@ -260,10 +314,12 @@ sbuf_rm(struct sbuf *str, size_t rm_size)
     sbuf_lock(str);
     if (str->offset) {
         i = str->offset;
-        do {
+
+	do {
             str->buf[--i] = 0;
         } while (--rm_size && i);
-        str->offset = i;
+
+	str->offset = i;
     }
     sbuf_unlock(str);
 }
@@ -274,18 +330,19 @@ sbuf_rm_before_offset(struct sbuf *str, size_t rm_size, size_t offset)
     long i;
     char *save;
 
-    if (!rm_size)
+    if (rm_size < 1) {
         return 0;
+    }
 
     sbuf_lock(str);
     if (offset > str->offset) {
-        sbuf_unlock(str);
-        return -1;
+	offset = str->offset;
     }
 
     i = (long) (offset - rm_size);
-    if (i < 0)
+    if (i < 0) {
         i = 0;
+    }
 
     save = &str->buf[offset];
     sbuf_rm_memmove_buffer(str, (size_t) i, save);
@@ -298,8 +355,10 @@ sbuf_rm_after_offset(struct sbuf *str, size_t rm_size, size_t offset)
 {
     int ret;
 
-    if (!rm_size)
+    if (!rm_size) {
         return 0;
+    }
+    
     SBUF_SAFE_CALL(ret, sbuf_rm_after_offset_unsafe, str, rm_size, offset);
     return ret;
 }
@@ -310,15 +369,18 @@ sbuf_rm_after_offset_unsafe(struct sbuf *str, size_t rm_size, size_t offset)
     size_t i;
     char *save;
 
-    if (offset > str->offset)
+    if (offset > str->offset) {
         return -1;
+    }
 
     i = offset + rm_size;
-    if (i >= str->offset)
+    if (i >= str->offset) {
         i = str->offset;
+    }
 
     save = &str->buf[i];
     sbuf_rm_memmove_buffer(str, offset, save);
+    
     return 0;
 }
 
@@ -329,10 +391,12 @@ sbuf_rm_memmove_buffer(struct sbuf *str, size_t offset, const char *strmove)
 
     str->offset = offset;
     movelen = strlen(strmove);
+
     if (movelen) {
         memmove((str->buf + offset), strmove, movelen);
         str->offset += movelen;
     }
+    
     str->buf[str->offset] = 0;
 }
 
@@ -341,8 +405,9 @@ sbuf_replace(struct sbuf *str, const char *oldstr, const char *newstr)
 {
     int ret;
 
-    if (!oldstr || !oldstr[0] || !newstr)
+    if (!oldstr || !oldstr[0] || !newstr) {
         return -1;
+    }
 
     SBUF_SAFE_CALL(ret, sbuf_replace_unsafe, str, oldstr, newstr);
     return ret;
@@ -353,11 +418,13 @@ sbuf_replace_unsafe(struct sbuf *str, const char *oldstr, const char *newstr)
 {
     long offset;
 
-    if ((offset = sbuf_search_str_offset_unsafe(str, oldstr)) < 0)
+    if ((offset = sbuf_search_str_offset_unsafe(str, oldstr)) < 0) {
         return -1;
+    }
 
-    if (sbuf_rm_after_offset_unsafe(str, strlen(oldstr), (size_t) offset) < 0)
+    if (sbuf_rm_after_offset_unsafe(str, strlen(oldstr), (size_t) offset) < 0) {
         return -1;
+    }
 
     sbuf_add_to_offset_unsafe(str, (size_t) offset, newstr);
     return 0;
@@ -371,8 +438,9 @@ sbuf_replace_all(struct sbuf *str, const char *oldstr, const char *newstr)
 
     sbuf_lock(str);
     for (;;) {
-        if (sbuf_replace_unsafe(str, oldstr, newstr) < 0)
+        if (sbuf_replace_unsafe(str, oldstr, newstr) < 0) {
             break;
+	}
     }
     sbuf_unlock(str);
 }
@@ -384,8 +452,9 @@ sbuf_read_file(struct sbuf *str, const char *path)
     ssize_t nread;
     char buffer[1024];
 
-    if ((fd = open(path, O_RDONLY)) < 0)
+    if ((fd = open(path, O_RDONLY)) < 0) {
         return -SBUF_ERR_OPEN;
+    }
 
     sbuf_lock(str);
     do {
@@ -408,10 +477,13 @@ sbuf_read_file(struct sbuf *str, const char *path)
 const char *
 sbuf_rdfile_get_func_fail(int errnum)
 {
-    if (errnum == -SBUF_ERR_OPEN)
+    if (errnum == -SBUF_ERR_OPEN) {
         return "open";
-    else if (errnum == -SBUF_ERR_READ)
+    }
+    else if (errnum == -SBUF_ERR_READ) {
         return "read";
+    }
+    
     return "nop";
 }
 
@@ -428,8 +500,11 @@ void
 sbuf_reset(struct sbuf *str)
 {
     sbuf_lock(str);
-    if (str->buf)
+
+    if (str->buf) {
         memset(str->buf, 0, str->size);
+    }
+    
     str->offset = 0;
     sbuf_unlock(str);
 }
