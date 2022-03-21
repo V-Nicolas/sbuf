@@ -47,6 +47,8 @@ void test_sbuf_replace(struct sbuf *s);
 void test_sbuf_replace_all(struct sbuf *s);
 void test_sbuf_read_file(struct sbuf *s);
 void test_sbuf_string_copy(struct sbuf *s);
+void test_sbuf_has_prefix(struct sbuf *s);
+void test_sbuf_has_suffix(struct sbuf *s);
 void test_sbuf_rdfile_get_func_fail(void);
 void tests(struct sbuf *s);
 
@@ -77,6 +79,8 @@ main(int argc, char **argv)
     test_sbuf_read_file(&str);
     test_sbuf_rdfile_get_func_fail();
     test_sbuf_string_copy(&str);
+    test_sbuf_has_prefix(&str);
+    test_sbuf_has_suffix(&str);
     sbuf_free(&str);
     assert(str.buf == NULL);
 
@@ -405,6 +409,41 @@ test_sbuf_replace_all(struct sbuf *s)
     assert(strcmp(s->buf, "aZERty aZERty") == 0);
     sbuf_add(s, " azerty");
     assert(strcmp(s->buf, "aZERty aZERty azerty") == 0);
+
+    sbuf_reset(s);
+    sbuf_add(s, "\r\t\r\t");
+    sbuf_replace_all(s, "\r", "\\r");
+    assert(strcmp(s->buf, "\\r\t\\r\t") == 0);
+
+    sbuf_reset(s);
+    sbuf_add(s, "\\r\t\\r\t");
+    sbuf_replace_all(s, "\\r", "\r");
+    assert(strcmp(s->buf, "\r\t\r\t") == 0);
+
+    sbuf_reset(s);
+    sbuf_add(s, "\n\n\n\n");
+    sbuf_replace_all(s, "\n", "\\n");
+    assert(strcmp(s->buf, "\\n\\n\\n\\n") == 0);
+
+    sbuf_reset(s);
+    sbuf_add(s, "\\n\\n\\n\\n");
+    sbuf_replace_all(s, "\\n", "\n");
+    assert(strcmp(s->buf, "\n\n\n\n") == 0);
+
+    sbuf_reset(s);
+    sbuf_add(s, "////");
+    sbuf_replace_all(s, "/", "//");
+    assert(strcmp(s->buf, "////////") == 0);
+
+    sbuf_reset(s);
+    sbuf_add(s, "////////");
+    sbuf_replace_all(s, "//", "//");
+    assert(strcmp(s->buf, "////////") == 0);
+
+    sbuf_reset(s);
+    sbuf_add(s, "////////");
+    sbuf_replace_all(s, "//", "/");
+    assert(strcmp(s->buf, "////") == 0);
 }
 
 void
@@ -433,6 +472,32 @@ test_sbuf_string_copy(struct sbuf *s)
     cpy = sbuf_string_copy(s);
     assert(strcmp(cpy, s->buf) == 0);
     free(cpy);
+}
+
+void
+test_sbuf_has_prefix(struct sbuf *s)
+{
+    sbuf_reset(s);
+    assert(sbuf_has_prefix(s, "test") != 0);
+    
+    sbuf_add(s, "test.prefix");
+    assert(sbuf_has_prefix(s, "test.") == 0);
+
+    sbuf_add(s, "c");
+    assert(sbuf_has_prefix(s, "test.test") != 0);
+}
+
+void
+test_sbuf_has_suffix(struct sbuf *s)
+{
+    sbuf_reset(s);
+    assert(sbuf_has_suffix(s, ".c") != 0);
+    
+    sbuf_add(s, ".c");
+    assert(sbuf_has_suffix(s, ".c") == 0);
+
+    sbuf_add(s, "c");
+    assert(sbuf_has_suffix(s, ".c") != 0);
 }
 
 void
@@ -479,7 +544,8 @@ tests(struct sbuf *s)
     sbuf_trim_blank(s);
     sbuf_trim_blank(s);
     assert(strcmp(s->buf, "azerty! tests just") == 0);
-
+    assert(sbuf_has_prefix(s, "azerty!") == 0);
+    
     sbuf_add(s, " fun !!");
     assert(strcmp(s->buf, "azerty! tests just fun !!") == 0);
 
@@ -493,7 +559,6 @@ tests(struct sbuf *s)
 
     sbuf_rm_before_offset(s, 8, 8);
     assert(strcmp(s->buf, "jusT fun !!") == 0);
-
 
     sbuf_trim_char(s, '!');
     assert(strcmp(s->buf, "jusT fun ") == 0);
@@ -509,9 +574,10 @@ tests(struct sbuf *s)
     assert(ret > 0);
     sbuf_rm_after_offset(s, 28, (size_t) ret);
     assert(strcmp(s->buf, "just for fun") == 0);
-    
-    sbuf_add(s, ", is end");
-    assert(strcmp(s->buf, "just for fun, is end") == 0);
+
+    sbuf_add(s, ", is.end");
+    assert(strcmp(s->buf, "just for fun, is.end") == 0);
+    assert(sbuf_has_suffix(s, "is.end") == 0);
     
     copy = sbuf_string_copy(s);
     assert(strcmp(s->buf, copy) == 0);

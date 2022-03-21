@@ -58,11 +58,13 @@ int sbuf_trim_char(struct sbuf *str, char c);
 void sbuf_rm(struct sbuf *str, size_t rm_size);
 int sbuf_rm_before_offset(struct sbuf *str, size_t rm_size, size_t offset);
 int sbuf_rm_after_offset(struct sbuf *str, size_t rm_size, size_t offset);
-int sbuf_replace(struct sbuf *str, const char *oldstr, const char *newstr);
+long sbuf_replace(struct sbuf *str, const char *oldstr, const char *newstr);
 void sbuf_replace_all(struct sbuf *str, const char *oldstr, const char *newstr);
 int sbuf_read_file(struct sbuf *str, const char *path);
 const char * sbuf_rdfile_get_func_fail(int errnum);
 char * sbuf_string_copy(struct sbuf *str);
+int sbuf_has_prefix(struct sbuf *str, const char *prefix);
+int sbuf_has_suffix(struct sbuf *str, const char *suffix);
 void sbuf_reset(struct sbuf *str);
 void sbuf_free(struct sbuf *str);
 

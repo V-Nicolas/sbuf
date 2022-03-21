@@ -186,11 +186,11 @@ Description: Convert string to upper.
 
 
 ```
-void sbuf_replace(struct sbuf *str, const char *oldstr, const char *newstr);
+long sbuf_replace(struct sbuf *str, const char *oldstr, const char *newstr);
 ```
 Description: Replace first oldstr occurency by newstr<br/>
-Return: -1 if oldstr not found or other error :)<br/>
-        0 replace success.<br/>
+Return: -1 error<br/>
+        0 success: offset after sub string replaced.<br/>
 <br/>
 <br/>
 
@@ -202,6 +202,21 @@ Description: Replace all oldstr occurency by newstr<br/>
 <br/>
 <br/>
 
+```
+void sbuf_has_prefix(struct sbuf *str, const char *prefix);
+```
+Description: Check if string begin by prefix<br/>
+Return: 0 begin by prefix, else return -1<br />
+<br/>
+<br/>
+
+```
+void sbuf_has_suffix(struct sbuf *str, const char *suffix);
+```
+Description: Check if string end by suffix<br/>
+Return: 0 end by prefix, else return -1<br />
+<br/>
+<br/>
 
 ```
 int sbuf_read_file(struct sbuf *str, const char *path);
